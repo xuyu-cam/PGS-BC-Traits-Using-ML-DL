@@ -1,0 +1,10 @@
+{'activation': 'sigmoid', 'dropout': 0.01, 'nb_layers': 2, 'nb_neurons': 64, 'optimizer': 'adagrad', 'weight_decay': 0.0}	0.29914280588908426
+{'activation': 'sigmoid', 'dropout': 0.01, 'nb_layers': 3, 'nb_neurons': 128, 'optimizer': 'adagrad', 'weight_decay': 0.0}	0.2990215286196572
+{'nb_neurons': 128, 'nb_layers': 2, 'activation': 'sigmoid', 'optimizer': 'adagrad', 'dropout': 0.01, 'weight_decay': 0.0}	0.2988876660932787
+{'activation': 'linear', 'dropout': 0.01, 'nb_layers': 2, 'nb_neurons': 16, 'optimizer': 'adagrad', 'weight_decay': 0.0}	0.29885171884614864
+{'activation': 'linear', 'dropout': 0.01, 'nb_layers': 2, 'nb_neurons': 32, 'optimizer': 'adagrad', 'weight_decay': 0.0}	0.2987241011995288
+{'activation': 'linear', 'dropout': 0.01, 'nb_layers': 2, 'nb_neurons': 32, 'optimizer': 'adagrad', 'weight_decay': 0.01}	0.29862779755564917
+{'activation': 'linear', 'dropout': 0.01, 'nb_layers': 2, 'nb_neurons': 64, 'optimizer': 'adagrad', 'weight_decay': 0.0}	0.2986190153223919
+{'activation': 'sigmoid', 'dropout': 0.225, 'nb_layers': 2, 'nb_neurons': 128, 'optimizer': 'adagrad', 'weight_decay': 0.0}	0.298122513814709
+{'activation': 'linear', 'dropout': 0.225, 'nb_layers': 2, 'nb_neurons': 16, 'optimizer': 'adadelta', 'weight_decay': 0.0}	0.29803922166942376
+{'activation': 'linear', 'dropout': 0.01, 'nb_layers': 2, 'nb_neurons': 16, 'optimizer': 'adagrad', 'weight_decay': 0.01}	0.2976798652232652
