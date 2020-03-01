@@ -139,7 +139,7 @@ if __name__ == "__main__":
     beta_path = "/condsig_variants_com_beta/"
 
     #File that store the results
-    results_file = "/results/ukb_results_UNI_only_condsig_com.txt"
+    results_file = "/results/ukb_results_UNI_BR_EN_condsig_com.txt"
 
     #Folder path under which all the traied EN and BR models will be stored
     model_path = "/EN_BR_condsig_variants_com/"
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     #Folder path under which conditonal analysis variants of each trait is stored by file
     variants_path = "/condsig_variants_com/"
 
-    #Folder path under which adjusted trait values of each trait is stored by file
+    #Folder path under which adjusted trait values of each trait in UKB is stored by file
     ukb_traits_value_file ="/ukbb_500k.sample"
 
     if os.path.isdir(model_path) == False:

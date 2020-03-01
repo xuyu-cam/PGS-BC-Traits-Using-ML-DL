@@ -13,6 +13,7 @@ from scipy.stats import pearsonr
 
 
 def get_trait_abbrs(trait_abbr_file):
+    # get the full trait list
     trait_abbr =[]
     with open(trait_abbr_file) as f:
         f.readline()
@@ -23,6 +24,11 @@ def get_trait_abbrs(trait_abbr_file):
 
 
 def read_trait_genotypes(trait,xdata_path,var_ids):
+    # get genotype data of a trait
+    # trait: trait name
+    # xdata_path: path where the genotype data is stored; genotype data of a trait is stored with a gzipped csv file in which the data entry is seperated using ','
+    # var_ids: the list of variants ids used
+    # returning the used sample ids and a matrix of samples X variants (snps)
     geno_file = xdata_path + trait + '_xdata.csv.gz'
     df = pd.read_csv(geno_file, sep=',',compression='gzip')
     sample_ids = list(df["sample_ids"])
@@ -31,19 +37,22 @@ def read_trait_genotypes(trait,xdata_path,var_ids):
 
 
 def read_variant_ids(trait,variants_path):
+    # read the full list of conditional variants ids of a given trait
     variants_file = variants_path + trait + '_condsig'
     df = pd.read_csv(variants_file,header=None)
     return list(df[0])
 
 def read_related_sampleIDs(file):
+    # read the sample ids in INTERVAL that are related to samples in UKB
     sampleIDs = []
     with open(file) as f:
         for line in f:
             sampleIDs.append(int(line.strip()))
     return sampleIDs
 
-# function that gets the pheno data by a vector
+
 def get_trait_vector(pheno_name,pheno_file_path):
+    # function that gets the adjusted trait data by a vector
     col_name_index_map = {}
     pheno_vec = []
     with open(pheno_file_path) as f:
@@ -51,7 +60,6 @@ def get_trait_vector(pheno_name,pheno_file_path):
         for i in range(len(col_name_line)):
             col_name_index_map[col_name_line[i]]=i
         target_index = col_name_index_map[pheno_name+ '_gwas_normalised']
-    #    f.readline() # skip the null line
         for line in f:
             line = line.strip().split()
             pheno_vec.append(line[target_index])
@@ -59,6 +67,7 @@ def get_trait_vector(pheno_name,pheno_file_path):
 
 
 def get_valid_sample_index(ydata):
+    # get the vaild sample indexes (only based on standard QCs described)
    valid_index = []
    for i in range(len(ydata)): #Filtering NA samples in xdata and ydata
        if ydata[i] != 'NA':
@@ -66,6 +75,7 @@ def get_valid_sample_index(ydata):
    return valid_index
 
 def get_valid_sample_relevant_id_filtering(ydata,sample_ids,relevant_ids):
+    # get the vaild sample indexes (based on both the standard QCs and these related samples)
    valid_index = []
    for i in range(len(ydata)): #Filtering NA samples in xdata and ydata;
        if ydata[i] != 'NA' and sample_ids[i] not in relevant_ids:
@@ -78,61 +88,71 @@ def get_prediction_measures(model,X,y):
 
 
 def run_experiments_5_folders(trait_abbr_file,xdata_path,variants_path,beta_path,model_path,results_file,ukb_traits_value_file,relevant_sampleIDs_file,Remove_relavated_samples):
+    # Testing the performance of the trained EN and BR model (internal test) and the univariant method on the INTERVAL data (external test)
+    # Remove_relavated_samples: FALSE OR TRUE
+
 
     trait_abbrs = get_trait_abbrs(trait_abbr_file) # Trait list that includes all the trait names
-    relevant_sample_ids = read_related_sampleIDs(relevant_sampleIDs_file)
-    kf = KFold(n_splits=5, shuffle=True, random_state=21)
 
+    #read sample ids that are related to samples in UKB
+    relevant_sample_ids = read_related_sampleIDs(relevant_sampleIDs_file)
+
+    kf = KFold(n_splits=5, shuffle=True, random_state=21)
     with open(results_file,'w') as f:
         f.write("TRAIT\tTot_Samples\tFolder\tN_of_Vars\tPRS_R2\tPRS_R\tElasticNet_R2\tElasticNet_R\tBayesianRidge_R2\tBayesianRidge_R\n")
-       # f.write("TRAIT\tTot_Samples\tFolder\tN_of_Vars\tPRS_R2\tPRS_R\n")
         for trait in trait_abbrs:
 
-            if trait not in ['mscv','mrv','rdw_cv']:
-                print("{} - Start processing trait: {}".format(datetime.datetime.now(),trait))
-                var_ids = read_variant_ids(trait, variants_path)  # read variant ids in a list - in the order of them listed in the file
-                sample_ids_pre,X = read_trait_genotypes(trait,xdata_path,var_ids) # read samples IDs in a list, and sample-genotype X data matrix
-                y_pre = get_trait_vector(trait,ukb_traits_value_file) # read a vector of trait values against the X data matrix
+            print("{} - Start processing trait: {}".format(datetime.datetime.now(),trait))
 
-                if Remove_relavated_samples == False:
-                    valid_index = get_valid_sample_index(y_pre)   # non-"NA" samples are kept only
-                else:
-                    valid_index = get_valid_sample_relevant_id_filtering(y_pre,sample_ids_pre,relevant_sample_ids)  # only non-"NA" and non-revelant samples are kept
+            # read conditional analysis variants ids in a list - in the order of them listed in the file
+            var_ids = read_variant_ids(trait, variants_path)
 
-                X = X[valid_index,:]
-                y = np.array([float(y_pre[i]) for i in valid_index])
-                sample_ids = [sample_ids_pre[i] for i in valid_index]
+            # read samples IDs in a list, and sample-genotype X data matrix
+            sample_ids_pre,X = read_trait_genotypes(trait,xdata_path,var_ids)
 
+            # read a vector of adjusted trait values against the X data matrix
+            y_pre = get_trait_vector(trait,ukb_traits_value_file)
 
-                folder_count = 0
-                for train_index, test_index in kf.split(X):
-                    folder_count += 1
-                    print("folder-{}".format(folder_count))
+            if Remove_relavated_samples == False:  # choose whether remove these relevant samples
+                valid_index = get_valid_sample_index(y_pre)   # non-"NA" samples are kept only
+            else:
+                valid_index = get_valid_sample_relevant_id_filtering(y_pre,sample_ids_pre,relevant_sample_ids)  # only non-"NA" and non-revelant samples are kept
 
-
-                    model_file = model_path + trait + "_EN_model_" + str(folder_count) + ".pkl"
-                    print("model file: {}".format(model_file))
-                    en_model = joblib.load(model_file)
-                    EN_r2, EN_r = get_prediction_measures(en_model, X, y)
-                    print("R2: {}, r: {}".format(EN_r2, EN_r))
+            # get the final valid genotype data X and and trait value data y
+            X = X[valid_index,:]
+            y = np.array([float(y_pre[i]) for i in valid_index])
+            sample_ids = [sample_ids_pre[i] for i in valid_index]
 
 
-                    print("{}-folder-{} Running BayesianRidge...".format(datetime.datetime.now(), folder_count))
-                    model_file = model_path + trait + "_BR_model_" + str(folder_count) + ".pkl"
-                    print("model file: {}".format(model_file))
-                    br_model = joblib.load(model_file)
-                    BR_r2, BR_r = get_prediction_measures(br_model, X, y)
-                    print("R2: {}, r: {}".format(BR_r2, BR_r))
+            folder_count = 0
+
+            #run external test for 5 times using the 5 trained models from UKB
+            for train_index, test_index in kf.split(X):
+                folder_count += 1
+                print("folder-{}".format(folder_count))
+
+                model_file = model_path + trait + "_EN_model_" + str(folder_count) + ".pkl"
+                print("model file: {}".format(model_file))
+                en_model = joblib.load(model_file) # Load a EN model
+                EN_r2, EN_r = get_prediction_measures(en_model, X, y)
+                print("R2: {}, r: {}".format(EN_r2, EN_r))
 
 
-                    print("{}-folder-{} Running PRS...".format(datetime.datetime.now(), folder_count))
-                    beta_file = beta_path + trait + "_beta"
-                    GRS_r2, GRS_r = traditional_GRS_selected_vars(beta_file, X, y,var_ids)
-                    print("R2: {}, r: {}".format(GRS_r2, GRS_r))
+                print("{}-folder-{} Running BayesianRidge...".format(datetime.datetime.now(), folder_count))
+                model_file = model_path + trait + "_BR_model_" + str(folder_count) + ".pkl"
+                print("model file: {}".format(model_file))
+                br_model = joblib.load(model_file) # Load a BR model
+                BR_r2, BR_r = get_prediction_measures(br_model, X, y)
+                print("R2: {}, r: {}".format(BR_r2, BR_r))
 
-                    f.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(trait,X.shape[0],folder_count,X.shape[1], GRS_r2,GRS_r, EN_r2, EN_r, BR_r2, BR_r))
-                    #f.write("{}\t{}\t{}\t{}\t{}\t{}\n".format(trait, X.shape[0],folder_count, X.shape[1], GRS_r2,GRS_r))
-                    f.flush()
+
+                print("{}-folder-{} Running PRS...".format(datetime.datetime.now(), folder_count))
+                beta_file = beta_path + trait + "_beta"
+                GRS_r2, GRS_r = traditional_GRS_selected_vars(beta_file, X, y,var_ids)
+                print("R2: {}, r: {}".format(GRS_r2, GRS_r))
+
+                f.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(trait,X.shape[0],folder_count,X.shape[1], GRS_r2,GRS_r, EN_r2, EN_r, BR_r2, BR_r))
+                f.flush()
 
 
 if __name__ == "__main__":
@@ -146,16 +166,19 @@ if __name__ == "__main__":
     # Folder path under which the GWAS betas of each trait (conditonal analysis variants) is stored by file
     beta_path = "/condsig_variants_com_beta/"
 
-    # File that store the results
-    results_file = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/ukb_blood_traits_genetics/5k_vars_com_ukb_interval/interval_results_UNI_only_condsig_com_PC_adjusted.txt"
-    model_path = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/ukb_blood_traits_genetics/5k_vars_com_ukb_interval/models/EN_BR_condsig_variants_com_PC_adjusted/"
+    # File that store the results of external validation of EN, BR and UNI
+    results_file = "/interval_results_UNI_EN_BR_condsig_com.txt"
 
+    # Folder path under which all the traied EN and BR models (using UNB data) were stored
+    model_path = "/EN_BR_condsig_variants_com/"
+
+    # Folder path under which conditonal analysis variants of each trait is stored by file
     variants_path = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/ukb_blood_traits_genetics/5k_vars_com_ukb_interval/variants/condsig_variants_com/"
-    ukb_traits_value_file = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/data/interval_blood_cell_trait_PC_adjusted/int_170k.sample"
+
+    # Folder path under which adjusted trait values for each trait in INTERVAL is stored by file
+    interval_traits_value_file = "/int_170k.sample"
+
+    # Identified samples in INTERVAL that are releted to samples in UKB
     relevant_sampleIDs_file = "/home/yx322/tests/interval_related_UKBB.txt"
 
-    #if os.path.isdir(model_path) == False:
-    #       os.mkdir(model_path)
-    # run_experiments_5_folders(trait_abbr_file, data_path, beta_path, model_path, results_file)
-
-    run_experiments_5_folders(trait_abbr_file,data_path,variants_path,beta_path,model_path,results_file,ukb_traits_value_file,relevant_sampleIDs_file,Remove_relavated_samples=False)
+    run_experiments_5_folders(trait_abbr_file,data_path,variants_path,beta_path,model_path,results_file,interval_traits_value_file,relevant_sampleIDs_file,Remove_relavated_samples=False)
