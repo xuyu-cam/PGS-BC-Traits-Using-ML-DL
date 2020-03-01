@@ -14,3 +14,5 @@ Main functions that train EN, BR CNN, MLP models for blood cell traits PGS on UK
  # NN Structures
  Files that store the selected top 10 MLP and CNN structures from validation step.
  
+ # requirement.txt
+ Environment configuration used for runing these ML/DL methods.
