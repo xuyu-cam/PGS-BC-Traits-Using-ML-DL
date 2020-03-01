@@ -138,10 +138,10 @@ if __name__ == "__main__":
     map_file = "/TRAIT_MAP.tsv"
 
     #The folder path stores files having the variants of each trait
-    variants_files_path = "/variants/condsig_and_top_p_variants_com"
+    variants_files_path = "/variants/condsig_variants_com"
 
     #Plink path
-    plink = "/home/yx322/plink_2.0/plink2"
+    plink = "/plink_2.0/plink2"
 
     #Folder stores the Plink genotype files of the whole UKB
     ukb_bed_files = "/ukb_genetics_new_rsids"
@@ -156,7 +156,7 @@ if __name__ == "__main__":
     log_path = "/temp/temp_logs"
 
     #Folder saves the extracted genotype files
-    xdata_path = "/condsig_and_top_p_variants_com"
+    xdata_path = "/condsig_variants_com"
 
     if os.path.isdir(xdata_path) == False:
         os.mkdir(xdata_path)
