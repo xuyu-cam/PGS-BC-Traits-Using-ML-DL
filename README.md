@@ -1,9 +1,9 @@
 # PGS-BC-Traits-Using-ML-DL
 
-Gen_Data
+-Gen_Data
 
-Methods
+-Methods
 
-Run_jobs
+-Run_jobs
 
-Utls
+-Utls
