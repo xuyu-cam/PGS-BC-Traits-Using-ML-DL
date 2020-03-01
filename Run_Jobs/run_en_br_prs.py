@@ -7,67 +7,17 @@ import datetime,os
 from sklearn.model_selection import KFold
 from sklearn.externals import joblib
 import numpy as np
-import pandas as pd
+from Utls.read_traits import get_trait_abbrs
+from Utls.read_trait_genotypes import read_trait_genotypes
+from Utls.read_variants_ids import read_variant_ids
+from Utls.read_adjusted_trait_levels import get_trait_vector
+from Utls.get_QCed_sample_index import get_valid_sample_index
 
-
-def get_trait_abbrs(trait_abbr_file):
-    #get the full trait list
-    trait_abbr =[]
-    with open(trait_abbr_file) as f:
-        f.readline()
-        for line in f:
-            line = line.strip().split('\t')
-            trait_abbr.append(line[0])
-    return trait_abbr
-
-
-def read_trait_genotypes(trait,xdata_path,var_ids):
-    #get genotype data of a trait
-    #trait: trait name
-    #xdata_path: path where the genotype data is stored; genotype data of a trait is stored with a gzipped csv file in which the data entry is seperated using ','
-    #var_ids: the list of variants ids used
-    #returning the used sample ids and a matrix of samples X variants (snps)
-    geno_file = xdata_path + trait + '_xdata.csv.gz'
-    df = pd.read_csv(geno_file, sep=',',compression='gzip')
-    sample_ids = list(df["sample_ids"])
-    df = df[var_ids]
-    return sample_ids,np.array(df)
-
-
-def read_variant_ids(trait,variants_path):
-    #read the full list of conditional variants ids of a given trait
-    variants_file = variants_path + trait + '_condsig'
-    df = pd.read_csv(variants_file,header=None)
-    return list(df[0])
-
-
-def get_trait_vector(pheno_name,pheno_file_path):
-    # function that gets the adjusted trait value data via a vector
-    col_name_index_map = {}
-    pheno_vec = []
-    with open(pheno_file_path) as f:
-        col_name_line = f.readline().strip().split()
-        for i in range(len(col_name_line)):
-            col_name_index_map[col_name_line[i]]=i
-        target_index = col_name_index_map[pheno_name+ '_gwas_normalised']
-        for line in f:
-            line = line.strip().split()
-            pheno_vec.append(line[target_index])
-    return pheno_vec  #still a string list
-
-
-def get_valid_sample_index(ydata):
-    #get the vaild sample indexes
-   valid_index = []
-   for i in range(len(ydata)): #Filtering NA samples in xdata and ydata
-       if ydata[i] != 'NA':
-           valid_index.append(i)
-   return valid_index
 
 
 def run_experiments_5_folders(trait_abbr_file,xdata_path,variants_path,beta_path,model_path,results_file,ukb_traits_value_file):
     # Partition the UKB data into 5 folders, and train 5 BR/EN PGS models on any 4 folders of the data,
-    # and testing the performance of the trained model (internal test) and the univariant method on the remaing folder
+    # and testing the performance of the trained model (internal test) and the univariant method on the remaining folder
 
 
     trait_abbrs = get_trait_abbrs(trait_abbr_file) # Trait list that includes all the trait names

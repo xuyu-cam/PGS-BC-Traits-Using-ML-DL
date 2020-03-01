@@ -3,75 +3,38 @@
 from Methods.MLP import mlp_train
 import datetime,os,sys
 from sklearn.model_selection import KFold
-from sklearn.externals import joblib
 import numpy as np
-import pandas as pd
 from Utls.data_coding_converter import convert_to_one_hot
+from Utls.read_traits import get_trait_abbrs
+from Utls.read_trait_genotypes import read_trait_genotypes
+from Utls.read_variants_ids import read_variant_ids
+from Utls.read_adjusted_trait_levels import get_trait_vector
+from Utls.get_QCed_sample_index import get_valid_sample_index
 
+def run_experiments_5_folders(xdata_path,variants_path,networks_path,model_path,results_file,ukb_traits_value_file,trait,one_hot_coding):
+    # Partition the UKB data into 5 folders, and train 5 MLP PGS models on any 4 folders of the data,
+    # and testing the performance of the trained model (internal test) on the remaining folder
 
-def get_trait_abbrs(trait_abbr_file):
-    trait_abbr =[]
-    with open(trait_abbr_file) as f:
-        f.readline()
-        for line in f:
-            line = line.strip().split('\t')
-            trait_abbr.append(line[0])
-    return trait_abbr
-
-
-def read_trait_genotypes(trait,xdata_path,var_ids):
-    geno_file = xdata_path + trait + '_xdata.csv.gz'
-    df = pd.read_csv(geno_file, sep=',',compression='gzip')
-    sample_ids = list(df["sample_ids"])
-    df = df[var_ids]
-    return sample_ids,np.array(df)
-
-
-def read_variant_ids(trait,variants_path):
-    variants_file = variants_path + trait + '_condsig'
-    df = pd.read_csv(variants_file,header=None)
-    return list(df[0])
-
-# function that gets the pheno data by a vector
-def get_trait_vector(pheno_name,pheno_file_path):
-    col_name_index_map = {}
-    pheno_vec = []
-    with open(pheno_file_path) as f:
-        col_name_line = f.readline().strip().split()
-        for i in range(len(col_name_line)):
-            col_name_index_map[col_name_line[i]]=i
-        target_index = col_name_index_map[pheno_name+ '_gwas_normalised']
-   #     f.readline() # skip the null line
-        for line in f:
-            line = line.strip().split()
-            pheno_vec.append(line[target_index])
-    return pheno_vec  #still a string list
-
-
-def get_valid_sample_index(ydata):
-   valid_index = []
-   for i in range(len(ydata)): #Filtering NA samples in xdata and ydata
-       if ydata[i] != 'NA':
-           valid_index.append(i)
-   return valid_index
-
-
-def run_experiments_5_folders(trait_abbr_file,xdata_path,variants_path,networks_path,model_path,results_file,ukb_traits_value_file,trait,one_hot_coding):
-
-    #trait_abbrs = get_trait_abbrs(trait_abbr_file) # Trait list that includes all the trait names
+    # 5 folder partition
     kf = KFold(n_splits=5, shuffle=True, random_state=21)
-
     with open(results_file,'w') as f:
         f.write("TRAIT\tTot_Samples\tFolder\tN_of_Vars\tMLP_R2\tMLP_R\n")
 
         print("{} - Start processing trait: {}".format(datetime.datetime.now(),trait))
+
+        # read conditional analysis variants of a trait
         var_ids = read_variant_ids(trait, variants_path)
+
+        # read genotype data (matrix: Samples X variants), and the corresponding sample ids
         sample_ids_pre,X = read_trait_genotypes(trait,xdata_path,var_ids)
+
+        # get adjusted trait values of a trait
         y_pre = get_trait_vector(trait,ukb_traits_value_file)
 
+        # Get valid indexes of samples (trait values of excluded samples are set as 'NA' in the stored file)
         valid_index = get_valid_sample_index(y_pre)
-        X = X[valid_index,:]
 
+        X = X[valid_index,:]
         if one_hot_coding==True:
             X = convert_to_one_hot(X)
 
@@ -98,33 +61,38 @@ def run_experiments_5_folders(trait_abbr_file,xdata_path,variants_path,networks_
 
 if __name__ == "__main__":
 
-    # trait_abbr_file = "E:\\Blood Cell Trait Data\\TRAIT_MAP.tsv"
-    # data_path = "E:\\Blood Cell Trait Data\\xdata_ydata\\"
-    # results_file = "E:\\PyCharmProjects\\GenoImpute\\Results\\blood_traits_EN_BR_results_SNPs_condig.txt"
-    # run_experiments(trait_abbr_file, data_path, results_file)
-
+    # choose a trait by an index
     trait_index = int(sys.argv[1])
 
-
-    trait_abbr_file = "/home/yx322/tests/TRAIT_MAP.tsv"
+    trait_abbr_file = "/TRAIT_MAP.tsv"
     trait_abbrs_all = get_trait_abbrs(trait_abbr_file)  # Trait list that includes all the trait names
-    trait_abbrs = [trait for trait in trait_abbrs_all if trait not in ['mscv', 'mrv', 'rdw_cv']]
-    trait = trait_abbrs[trait_index]
+    trait = trait_abbrs_all[trait_index]
 
-    data_path = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/ukb_blood_traits_genetics/5k_vars_com_ukb_interval/condsig_xdata/condsig_xdata_com/"
+    # Folder path under which the UKB genotype data of each trait is stored by file
+    data_path = "/condsig_xdata_com/"
 
-    result_path = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/ukb_blood_traits_genetics/5k_vars_com_ukb_interval/results/ukb_results_MLP_condsig_com_PC_adjusted/"
+    # Path where the result files stored
+    result_path = "/ukb_results_MLP_condsig_com/"
 
+    # results file
     results_file = result_path + trait + "_ukb_results_MLP_condsig_com_PC_adjusted.txt"
-    model_path = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/ukb_blood_traits_genetics/5k_vars_com_ukb_interval/models/MLP_condsig_variants_com_PC_adjusted/"
-    variants_path = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/ukb_blood_traits_genetics/5k_vars_com_ukb_interval/variants/condsig_variants_com/"
-    ukb_traits_value_file ="/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/data/ukb_blood_cell_trait_eu_PC_adjusted/ukbb_500k.sample"
-    networks_path = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/ukb_blood_traits_genetics/5k_vars_com_ukb_interval/nn_structures/MLP_Results/"
+
+    # Folder path under which all the traied MLP models will be stored
+    model_path = "/MLP_condsig_variants_com/"
+
+    # Folder path under which conditonal analysis variants of each trait is stored by file
+    variants_path = "/condsig_variants_com/"
+
+    #Folder path under which adjusted trait values of each trait in UKB is stored by file
+    ukb_traits_value_file ="/ukbb_500k.sample"
+
+    # Folder path under which all the selected top 10 MLP network structures of each trait were stored by txt files
+    # Note that, based on the protocal described in https://github.com/paubellot/DL-Biobank, we selected the top 10 MLP models via a validation step on the training data.
+    networks_path = "/MLP_structures/"
 
     if os.path.isdir(model_path) == False:
            os.mkdir(model_path)
     if os.path.isdir(result_path) == False:
         os.mkdir(result_path)
-    # run_experiments_5_folders(trait_abbr_file, data_path, beta_path, model_path, results_file)
 
-    run_experiments_5_folders(trait_abbr_file,data_path,variants_path,networks_path,model_path,results_file,ukb_traits_value_file,trait,False)
+    run_experiments_5_folders(data_path,variants_path,networks_path,model_path,results_file,ukb_traits_value_file,trait,False)

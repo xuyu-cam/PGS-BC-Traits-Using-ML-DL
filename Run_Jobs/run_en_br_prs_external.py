@@ -1,96 +1,25 @@
 
 
-from Methods.ElasticNet import full_fit_ElasticNetCV_GD
-from Methods.BayesianRidge import full_fit_BayesianRidge
 from Methods.Traditional_GRS import traditional_GRS_selected_vars
 import datetime,os
 from sklearn.model_selection import KFold
 from sklearn.externals import joblib
 import numpy as np
 import pandas as pd
-from sklearn.metrics import r2_score
-from scipy.stats import pearsonr
 
-
-def get_trait_abbrs(trait_abbr_file):
-    # get the full trait list
-    trait_abbr =[]
-    with open(trait_abbr_file) as f:
-        f.readline()
-        for line in f:
-            line = line.strip().split('\t')
-            trait_abbr.append(line[0])
-    return trait_abbr
-
-
-def read_trait_genotypes(trait,xdata_path,var_ids):
-    # get genotype data of a trait
-    # trait: trait name
-    # xdata_path: path where the genotype data is stored; genotype data of a trait is stored with a gzipped csv file in which the data entry is seperated using ','
-    # var_ids: the list of variants ids used
-    # returning the used sample ids and a matrix of samples X variants (snps)
-    geno_file = xdata_path + trait + '_xdata.csv.gz'
-    df = pd.read_csv(geno_file, sep=',',compression='gzip')
-    sample_ids = list(df["sample_ids"])
-    df = df[var_ids]
-    return sample_ids,np.array(df)
-
-
-def read_variant_ids(trait,variants_path):
-    # read the full list of conditional variants ids of a given trait
-    variants_file = variants_path + trait + '_condsig'
-    df = pd.read_csv(variants_file,header=None)
-    return list(df[0])
-
-def read_related_sampleIDs(file):
-    # read the sample ids in INTERVAL that are related to samples in UKB
-    sampleIDs = []
-    with open(file) as f:
-        for line in f:
-            sampleIDs.append(int(line.strip()))
-    return sampleIDs
-
-
-def get_trait_vector(pheno_name,pheno_file_path):
-    # function that gets the adjusted trait data by a vector
-    col_name_index_map = {}
-    pheno_vec = []
-    with open(pheno_file_path) as f:
-        col_name_line = f.readline().strip().split()
-        for i in range(len(col_name_line)):
-            col_name_index_map[col_name_line[i]]=i
-        target_index = col_name_index_map[pheno_name+ '_gwas_normalised']
-        for line in f:
-            line = line.strip().split()
-            pheno_vec.append(line[target_index])
-    return pheno_vec  #still a string list
-
-
-def get_valid_sample_index(ydata):
-    # get the vaild sample indexes (only based on standard QCs described)
-   valid_index = []
-   for i in range(len(ydata)): #Filtering NA samples in xdata and ydata
-       if ydata[i] != 'NA':
-           valid_index.append(i)
-   return valid_index
-
-def get_valid_sample_relevant_id_filtering(ydata,sample_ids,relevant_ids):
-    # get the vaild sample indexes (based on both the standard QCs and these related samples)
-   valid_index = []
-   for i in range(len(ydata)): #Filtering NA samples in xdata and ydata;
-       if ydata[i] != 'NA' and sample_ids[i] not in relevant_ids:
-           valid_index.append(i)
-   return valid_index
-
-def get_prediction_measures(model,X,y):
-    y_pred = model.predict(X)
-    return r2_score(y, y_pred), pearsonr(y, y_pred)[0]
+from Utls.read_traits import get_trait_abbrs
+from Utls.read_trait_genotypes import read_trait_genotypes
+from Utls.read_variants_ids import read_variant_ids
+from Utls.read_adjusted_trait_levels import get_trait_vector
+from Utls.get_QCed_sample_index import get_valid_sample_index
+from Utls.read_revelant_sample_ids import read_related_sampleIDs
+from Utls.get_QCed_non_relevant_sample_ids import get_valid_sample_relevant_id_filtering
+from Utls.get_model_prediction import get_prediction_measures
 
 
 def run_experiments_5_folders(trait_abbr_file,xdata_path,variants_path,beta_path,model_path,results_file,ukb_traits_value_file,relevant_sampleIDs_file,Remove_relavated_samples):
     # Testing the performance of the trained EN and BR model (internal test) and the univariant method on the INTERVAL data (external test)
     # Remove_relavated_samples: FALSE OR TRUE
-
 
     trait_abbrs = get_trait_abbrs(trait_abbr_file) # Trait list that includes all the trait names
 
