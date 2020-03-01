@@ -137,15 +137,16 @@ def run_experiments_5_folders(trait_abbr_file,xdata_path,variants_path,beta_path
 
 if __name__ == "__main__":
 
-    # trait_abbr_file = "E:\\Blood Cell Trait Data\\TRAIT_MAP.tsv"
-    # data_path = "E:\\Blood Cell Trait Data\\xdata_ydata\\"
-    # results_file = "E:\\PyCharmProjects\\GenoImpute\\Results\\blood_traits_EN_BR_results_SNPs_condig.txt"
-    # run_experiments(trait_abbr_file, data_path, results_file)
+    # File lists all the trait names
+    trait_abbr_file = "/TRAIT_MAP.tsv"
 
-    trait_abbr_file = "/home/yx322/tests/TRAIT_MAP.tsv"
-    data_path = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/ukb_blood_traits_genetics/5k_vars_com_ukb_interval/interval_xdata/condsig_variants_com/"
+    # Folder path under which the INTERVAL genotype data of each trait is stored by file
+    data_path = "/condsig_variants_com/"
 
-    beta_path = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/ukb_blood_traits_genetics/5k_vars_com_ukb_interval/variants/condsig_variants_com_beta/"
+    # Folder path under which the GWAS betas of each trait (conditonal analysis variants) is stored by file
+    beta_path = "/condsig_variants_com_beta/"
+
+    # File that store the results
     results_file = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/ukb_blood_traits_genetics/5k_vars_com_ukb_interval/interval_results_UNI_only_condsig_com_PC_adjusted.txt"
     model_path = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/ukb_blood_traits_genetics/5k_vars_com_ukb_interval/models/EN_BR_condsig_variants_com_PC_adjusted/"
 

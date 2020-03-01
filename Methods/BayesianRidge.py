@@ -4,7 +4,6 @@ from sklearn.linear_model import SGDRegressor
 import numpy as np
 from sklearn.metrics import r2_score
 from scipy.stats import pearsonr
-from sklearn.linear_model import ElasticNetCV
 from sklearn.linear_model import BayesianRidge
 from sklearn.linear_model import BayesianRidge
 

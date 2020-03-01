@@ -32,7 +32,7 @@ def traditional_GRS(beta_file,X,y):
     # y: testing trait value data
 
     beta_vec = get_beta_vec(beta_file)
-    beta_vec = -beta_vec  #
+    beta_vec = -beta_vec  # flip the sign of the effect sizes because the GWAS were conducted against the reference alleles
     y_pred = X.dot(beta_vec)
     # print(y_pred[:10],len(y_pred))
 
