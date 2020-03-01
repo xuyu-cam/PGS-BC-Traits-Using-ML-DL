@@ -1,6 +1,6 @@
 # PGS-BC-Traits-Using-ML-DL
 
-# Gen_Data
+# **Gen_Data**
  Codes that extract genotype files from plink-format data for ML/DL algorithms.
 
 # Methods
