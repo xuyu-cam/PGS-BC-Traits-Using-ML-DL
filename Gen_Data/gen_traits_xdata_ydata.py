@@ -135,28 +135,28 @@ if __name__ == "__main__":
     # trait_end_index = int(sys.argv[2])
 
     #files stores a list of traits being studied
-    map_file = "/home/yx322/tests/TRAIT_MAP.tsv"
+    map_file = "/TRAIT_MAP.tsv"
 
     #The folder path stores files having the variants of each trait
-    variants_files_path = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/ukb_blood_traits_genetics/5k_vars_com_ukb_interval/variants/condsig_and_top_p_variants_com"
+    variants_files_path = "/variants/condsig_and_top_p_variants_com"
 
     #Plink path
     plink = "/home/yx322/plink_2.0/plink2"
 
     #Folder stores the Plink genotype files of the whole UKB
-    ukb_bed_files = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/ukb_genetics_new_rsids"
+    ukb_bed_files = "/ukb_genetics_new_rsids"
 
     #Bed file prefix
     bed_file_name = 'ukb_imp_chr'
 
     #A folder saves teporarily generated files
-    temp_path = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/temp/"
+    temp_path = "/temp/"
 
     #A folder saves log files - an empty folder
-    log_path = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/temp/temp_logs"
+    log_path = "/temp/temp_logs"
 
     #Folder saves the extracted genotype files
-    xdata_path = "/home/yx322/rds/rds-jmmh2-projects/inouye_lab_other/impute_genomics/yx322/ukb_blood_traits_genetics/5k_vars_com_ukb_interval/condsig_xdata/condsig_and_top_p_variants_com"
+    xdata_path = "/condsig_and_top_p_variants_com"
 
     if os.path.isdir(xdata_path) == False:
         os.mkdir(xdata_path)
