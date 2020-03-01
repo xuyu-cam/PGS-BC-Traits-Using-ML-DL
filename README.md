@@ -10,3 +10,7 @@ Main functions that train EN, BR CNN, MLP models for blood cell traits PGS on UK
 
 # Utls
  Various utility functions that are used in the above codes.  
+ 
+ # NN Structures
+ Files that store the selected top 10 MLP and CNN structures from validation step.
+ 
