@@ -1,1 +1,2 @@
 
+# Input for SNPNET
