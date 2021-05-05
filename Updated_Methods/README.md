@@ -3,5 +3,6 @@
 Inputs for SNPNET should be a single Plink .pgen file which includes variants of all chromosomes
 
 # LDpred2
-Inputs for LDpred2 should be a single plink .bed file which includes varaints of all chromosomes;
+Inputs for LDpred2 should be a single Plink .bed file which includes variants of all chromosomes;
+
 It fits the models on all the variants genome-wide at once.
