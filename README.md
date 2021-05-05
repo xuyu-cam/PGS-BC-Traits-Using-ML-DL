@@ -4,9 +4,12 @@
 
 # Methods
  Method codes for P+T, EN (Sklearn implementation), BR, MLP, CNN.
+ (for performance comparison of PGS methods on the conditional analysis variants)
+ 
  
  # Updated_Methods
- Method codes for EN (SNPNET implementation) and LDpred2 (Fitting on genome-wide variants)
+ Method codes for EN (SNPNET implementation) and LDpred2 (Fitting on genome-wide variants).
+  (for performance comparison of PGS methods on the expanded variant sets)
 
 # Run_jobs
 Main functions that train EN, BR, CNN, MLP models (in **Methods**) for blood cell traits PGS on UKB data, and run internal and external tests with the trained models.
