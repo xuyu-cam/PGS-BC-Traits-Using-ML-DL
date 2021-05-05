@@ -3,7 +3,10 @@
  Codes that extract genotype files from plink-format data for ML/DL algorithms.
 
 # Methods
- Method codes for UNI, EN, BR, MLP, CNN.
+ Method codes for UNI, EN (Sklearn implementation), BR, MLP, CNN.
+ 
+ # Updated_Methods
+ Method codes for EN (SNPNET implementation) and LDpred2 (Fitting on genome-wide variants)
 
 # Run_jobs
 Main functions that train EN, BR, CNN, MLP models for blood cell traits PGS on UKB data, and run internal and external tests with the trained models.
