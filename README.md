@@ -1,6 +1,6 @@
 
 # Gen_Data
- Codes that extract genotype files from plink-format data for ML/DL algorithms.
+ Codes that extract genotype files from plink-format data for ML/DL algorithms (in **Methods**).
 
 # Methods
  Method codes for UNI, EN (Sklearn implementation), BR, MLP, CNN.
@@ -9,7 +9,7 @@
  Method codes for EN (SNPNET implementation) and LDpred2 (Fitting on genome-wide variants)
 
 # Run_jobs
-Main functions that train EN, BR, CNN, MLP models for blood cell traits PGS on UKB data, and run internal and external tests with the trained models.
+Main functions that train EN, BR, CNN, MLP models (in **Methods**) for blood cell traits PGS on UKB data, and run internal and external tests with the trained models.
 
 # Utls
  Various utility functions that are used in the above codes.  
@@ -18,7 +18,7 @@ Main functions that train EN, BR, CNN, MLP models for blood cell traits PGS on U
  Files that store the selected top 10 MLP and CNN structures from validation step.
  
  # requirement.txt
- Python environment configuration used for runing the ML/DL methods (under **Methods**).
+ Python environment configuration used for runing the ML/DL methods (in **Methods**).
  
- The required R packages for methods under **Updated_Methods** are given in their scripts.
+ The required R packages for methods in **Updated_Methods** are given in their scripts.
  
