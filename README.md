@@ -3,7 +3,7 @@
  Codes that extract genotype files from plink-format data for ML/DL algorithms (in **Methods**).
 
 # Methods
- Method codes for UNI, EN (Sklearn implementation), BR, MLP, CNN.
+ Method codes for P+T, EN (Sklearn implementation), BR, MLP, CNN.
  
  # Updated_Methods
  Method codes for EN (SNPNET implementation) and LDpred2 (Fitting on genome-wide variants)
